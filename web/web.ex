@@ -16,22 +16,11 @@ defmodule WebrtcExample.Web do
   below.
   """
 
-  def model do
-    quote do
-      use Ecto.Model
-
-      import Ecto.Changeset
-      import Ecto.Query, only: [from: 1, from: 2]
-    end
-  end
-
   def controller do
     quote do
       use Phoenix.Controller
 
       alias WebrtcExample.Repo
-      import Ecto.Model
-      import Ecto.Query, only: [from: 1, from: 2]
 
       import WebrtcExample.Router.Helpers
     end
@@ -62,8 +51,6 @@ defmodule WebrtcExample.Web do
       use Phoenix.Channel
 
       alias WebrtcExample.Repo
-      import Ecto.Model
-      import Ecto.Query, only: [from: 1, from: 2]
     end
   end
 

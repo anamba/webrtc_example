@@ -33,7 +33,7 @@ defmodule WebrtcExample.ClientChannel do
     # Logger.debug "offer #{name} #{inspect offer}"
     case State.get nm do
       nil -> :ok
-      data -> 
+      data ->
         State.put nm, Map.put(data, "otherName", name)
         do_broadcast name, "offer", %{type: "offer", offer: msg["offer"], name: nm}
     end
@@ -46,23 +46,23 @@ defmodule WebrtcExample.ClientChannel do
     |> Enum.each(&(Logger.debug &1))
     case State.get nm do
       nil -> :ok
-      data -> 
+      data ->
         State.put nm, Map.put(data, "otherName", name)
         do_broadcast name, "answer", %{type: "answer", answer: msg["answer"]}
     end
     {:noreply, socket}
   end
-  def handle_in("client:webrtc-" <> nm, %{"type" => "leave", "name" => name} = msg, socket) do
+  def handle_in("client:webrtc-" <> nm, %{"type" => "leave", "name" => name} = _msg, socket) do
     Logger.debug "Disconnecting from  #{name}"
     case State.get nm do
       nil -> :ok
-      data -> 
+      data ->
         State.put nm, Map.put(data, "otherName", nil)
         do_broadcast name, "leave", %{type: "leave"}
     end
     {:noreply, socket}
   end
-  def handle_in("client:webrtc-" <> nm, %{"type" => "candidate", 
+  def handle_in("client:webrtc-" <> _nm, %{"type" => "candidate",
       "name" => name, "candidate" => candidate} = msg, socket) do
     Logger.debug "Sending candidate to #{name}: #{inspect candidate}"
     do_broadcast name, "candidate", %{candidate: msg["candidate"]}

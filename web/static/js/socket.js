@@ -2,26 +2,27 @@
 // Copyright @E-MetroTel 2015 
 // 
 //<script src="https://www.webrtc-experiment.com/RTCPeerConnection-v1.5.js"></script>
-import {Socket} from "deps/phoenix/web/static/js/phoenix"
+import { Socket } from "phoenix"
 let socket = new Socket("/socket")
 
 
-$(document).ready(function() {
+$(document).ready(function () {
 
   var localStream;
-  var sdpConstraints = {video: false, audio: true};
+  var sdpConstraints = { video: false, audio: true };
 
   socket.connect()
 
   var loginPage = document.querySelector('#login-page'),
-      usernameInput = document.querySelector('#username'),
-      loginButton = document.querySelector('#login'),
-      callPage = document.querySelector('#call-page'),
-      theirUsernameInput = document.querySelector('#their-username'),
-      callButton = document.querySelector('#call'),
-      hangUpButton = document.querySelector('#hang-up'),
-      name;
+    usernameInput = document.querySelector('#username'),
+    loginButton = document.querySelector('#login'),
+    callPage = document.querySelector('#call-page'),
+    theirUsernameInput = document.querySelector('#their-username'),
+    callButton = document.querySelector('#call'),
+    hangUpButton = document.querySelector('#hang-up'),
+    name;
 
+  hangUpButton.style.display = "none";
   callPage.style.display = "none";
 
   // Login when the user clicks the button
@@ -29,7 +30,7 @@ $(document).ready(function() {
     name = usernameInput.value;
 
     if (name.length > 0) {
-      var chan = socket.channel("webrtc:client-"+name, {})
+      var chan = socket.channel("webrtc:client-" + name, {})
 
       chan.join()
         .receive("ok", resp => { onLogin(true) })
@@ -63,7 +64,7 @@ $(document).ready(function() {
       if (connectedUser) {
         message.name = connectedUser;
       }
-      chan.push("client:webrtc-" + name, message) 
+      chan.push("client:webrtc-" + name, message)
     }
 
     function onLogin(success) {
@@ -128,6 +129,8 @@ $(document).ready(function() {
       yourConnection.onicecandidate = null;
       yourConnection.onaddstream = null;
       setupPeerConnection(stream);
+      hangUpButton.style.display = "none";
+      callButton.style.display = "initial";
     }
 
     function hasUserMedia() {
@@ -143,7 +146,7 @@ $(document).ready(function() {
     }
 
     var theirAudio = document.querySelector('#theirs'),
-        yourConnection, connectedUser, stream;
+      yourConnection, connectedUser, stream;
 
     function startConnection() {
       if (hasUserMedia()) {
@@ -160,10 +163,10 @@ $(document).ready(function() {
             alert("Sorry, your browser does not support WebRTC.");
           }
         }, function (error) {
-            send({
-              type: "error",
-              message: "Sorry, your browser does not support WebRTC."
-            })
+          send({
+            type: "error",
+            message: "Sorry, your browser does not support WebRTC."
+          })
           console.log(error);
         });
       } else {
@@ -183,15 +186,17 @@ $(document).ready(function() {
 
       // Setup stream listening
       yourConnection.addStream(stream);
-      yourConnection.onaddstream = function (e) {
-        theirAudio.src = window.URL.createObjectURL(e.stream);
+      yourConnection.onaddstream = (e) => {
+        theirAudio.srcObject = e.stream;
+        callButton.style.display = "none";
+        hangUpButton.style.display = "initial";
       };
 
       // Setup ice handling
       yourConnection.onicecandidate = function (event) {
         if (event.candidate) {
           send({
-            name: name, 
+            name: name,
             type: "candidate",
             candidate: event.candidate
           });
